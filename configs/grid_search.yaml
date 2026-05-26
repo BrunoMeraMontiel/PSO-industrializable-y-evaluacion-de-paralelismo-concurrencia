@@ -1,0 +1,9 @@
+grid:
+  w: [0.4, 0.7298, 0.9]
+  c1: [1.0, 1.49618, 2.0]
+  c2: [1.0, 1.49618, 2.0]
+  n_particles: [30]
+  n_iterations: [300]
+seeds: [42, 123, 7, 99, 314]
+benchmarks: [sphere_d2, rastrigin_d10, ackley_d30]
+strategies: [V0_sequential]

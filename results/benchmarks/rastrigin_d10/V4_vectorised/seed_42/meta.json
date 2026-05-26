@@ -1,0 +1,39 @@
+{
+  "benchmark": "rastrigin_d10",
+  "strategy": "V4_vectorised",
+  "config": {
+    "n_particles": 40,
+    "n_iterations": 300,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 50,
+    "seed": 42
+  },
+  "best_fitness": 5.969777171279944,
+  "best_position": [
+    -1.989761777833329,
+    -3.311157884755835e-05,
+    0.9951612380788677,
+    -5.026188501089005e-05,
+    7.809334622588004e-05,
+    0.995048240985071,
+    -0.0001878398164606285,
+    -8.074500572655176e-07,
+    -0.00011834100857093809,
+    -9.903851597203324e-05
+  ],
+  "total_time": 0.011878251000041473,
+  "stop_reason": "max_iterations",
+  "n_iterations_actual": 300,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T18:00:35"
+}

@@ -1,0 +1,56 @@
+{
+  "benchmark": "portfolio_10assets",
+  "strategy": "V0_sequential",
+  "config": {
+    "n_particles": 50,
+    "n_iterations": 500,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 100,
+    "seed": 42
+  },
+  "best_fitness": -3.886965162615396,
+  "best_position": [
+    0.7647190293626983,
+    0.8038723651510455,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    0.0,
+    0.0,
+    0.1875561072302276,
+    0.290981534985166
+  ],
+  "total_time": 0.06331993999992847,
+  "stop_reason": "stagnation",
+  "n_iterations_actual": 283,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T21:16:39",
+  "n_assets": 10,
+  "risk_free_rate": 0.02,
+  "sharpe_ratio": 3.886965162615396,
+  "annual_return": 0.1699946048840844,
+  "annual_volatility": 0.03858913023628917,
+  "weights": [
+    0.15151564855934122,
+    0.15927319458271794,
+    0.1981324417748717,
+    0.0,
+    0.1981324417748717,
+    0.1981324417748717,
+    0.0,
+    0.0,
+    0.037160949495314656,
+    0.057652882038011194
+  ]
+}

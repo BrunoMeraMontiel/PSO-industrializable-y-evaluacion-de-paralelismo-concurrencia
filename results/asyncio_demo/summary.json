@@ -1,0 +1,20 @@
+{
+  "latency_ms": 10.0,
+  "n_particles": 30,
+  "n_iterations": 50,
+  "seeds": [
+    42,
+    123,
+    7
+  ],
+  "mean_times": {
+    "V0_sequential": 15.434407766000012,
+    "V1_threading": 0.8325379183333629,
+    "V3_asyncio": 1.1988329849999861
+  },
+  "speedups": {
+    "V0_sequential": 1.0,
+    "V1_threading": 18.538984743058638,
+    "V3_asyncio": 12.874527110213096
+  }
+}

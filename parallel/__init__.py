@@ -1,0 +1,6 @@
+from parallel.sequential import sequential_evaluator
+from parallel.threading_eval import ThreadEvaluator
+from parallel.multiprocessing_eval import ProcessEvaluator
+from parallel.async_eval import AsyncEvaluator, make_latent_fn
+from parallel.vectorised_eval import VectorisedEvaluator
+from parallel.factory import get_evaluator

@@ -1,0 +1,31 @@
+{
+  "benchmark": "rosenbrock_d2",
+  "strategy": "V1_threading",
+  "config": {
+    "n_particles": 40,
+    "n_iterations": 300,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 50,
+    "seed": 99
+  },
+  "best_fitness": 1.6535699549823277e-11,
+  "best_position": [
+    1.0000040154830425,
+    1.000008095137917
+  ],
+  "total_time": 1.7087340840000138,
+  "stop_reason": "max_iterations",
+  "n_iterations_actual": 300,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T17:59:53"
+}

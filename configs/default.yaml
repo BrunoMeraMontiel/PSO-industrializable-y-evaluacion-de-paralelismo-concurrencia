@@ -1,0 +1,9 @@
+benchmark: sphere_d2
+strategy: V0_sequential
+seed: 42
+n_particles: 30
+n_iterations: 200
+w: 0.7298
+c1: 1.49618
+c2: 1.49618
+topology: global

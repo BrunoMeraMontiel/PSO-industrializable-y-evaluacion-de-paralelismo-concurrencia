@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+.env
+.pytest_cache/
+
+# Resultados grandes o generados en ejecución
+*.gif
+*.mp4
+*.npz
+
+# Archivos de entorno local
+.DS_Store
+*.swp

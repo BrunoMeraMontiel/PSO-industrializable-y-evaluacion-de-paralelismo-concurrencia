@@ -1,0 +1,39 @@
+{
+  "benchmark": "ackley_d10",
+  "strategy": "V1_threading",
+  "config": {
+    "n_particles": 40,
+    "n_iterations": 300,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 50,
+    "seed": 42
+  },
+  "best_fitness": 7.434000481865155e-08,
+  "best_position": [
+    2.3162176527483193e-08,
+    -8.34056222961978e-09,
+    -1.4009533625695717e-08,
+    -1.854536068129492e-08,
+    -3.44499467375384e-08,
+    1.5350385777740278e-08,
+    3.4227883429055753e-09,
+    -2.7734611060096506e-08,
+    7.953853445665555e-09,
+    6.414901382276706e-09
+  ],
+  "total_time": 1.7461920920000011,
+  "stop_reason": "max_iterations",
+  "n_iterations_actual": 300,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T18:00:37"
+}

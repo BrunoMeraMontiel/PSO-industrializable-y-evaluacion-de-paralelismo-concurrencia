@@ -1,0 +1,31 @@
+{
+  "benchmark": "rastrigin_d2",
+  "strategy": "V0_sequential",
+  "config": {
+    "n_particles": 40,
+    "n_iterations": 300,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 50,
+    "seed": 7
+  },
+  "best_fitness": 5.222489107836736e-13,
+  "best_position": [
+    4.537452068122683e-08,
+    2.4064244476658985e-08
+  ],
+  "total_time": 0.02304429200000868,
+  "stop_reason": "tolerance",
+  "n_iterations_actual": 148,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T17:59:55"
+}

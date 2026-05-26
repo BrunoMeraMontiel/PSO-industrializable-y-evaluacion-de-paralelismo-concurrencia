@@ -1,0 +1,39 @@
+{
+  "benchmark": "rosenbrock_d10",
+  "strategy": "V0_sequential",
+  "config": {
+    "n_particles": 40,
+    "n_iterations": 300,
+    "w": 0.7298,
+    "c1": 1.49618,
+    "c2": 1.49618,
+    "topology": "global",
+    "boundary": "clamp",
+    "tol": 1e-12,
+    "stagnation": 50,
+    "seed": 123
+  },
+  "best_fitness": 4.586922647355039,
+  "best_position": [
+    0.9170747882043814,
+    0.8496585925147347,
+    0.7448986485723614,
+    0.559431061940523,
+    0.3231732420715193,
+    0.12425745309393224,
+    0.022906628564393603,
+    -0.0042344542573095134,
+    0.00993359254491818,
+    -0.0009906094893396035
+  ],
+  "total_time": 0.06239090200000419,
+  "stop_reason": "max_iterations",
+  "n_iterations_actual": 300,
+  "hardware": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "cpu": "x86_64",
+    "cpu_count": 16
+  },
+  "timestamp": "2026-05-26T18:00:16"
+}
