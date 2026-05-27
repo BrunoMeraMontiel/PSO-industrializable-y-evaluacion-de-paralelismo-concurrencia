@@ -156,9 +156,13 @@ def build(outdir: Path):
         sp(0.4),
         Paragraph("Comparativa de Estrategias de Evaluación Paralela: V0–V4", SUB),
         sp(2),
-        Paragraph("Programación de Sistemas Operativos — Curso 2025-2026",
+        Paragraph("Programación Paralela — 4º Curso Ingeniería Informática",
                   ParagraphStyle("m1", parent=BASE, fontSize=10.5, alignment=TA_CENTER)),
-        sp(0.3),
+        sp(0.2),
+        Paragraph("CUNEF Universidad · Escuela Politécnica Superior", META),
+        sp(0.1),
+        Paragraph("Prof. Dr. José Luis Salmerón · Curso 2025-2026", META),
+        sp(0.25),
         Paragraph("Python 3.12.3 · CPython · WSL2 (Linux 6.6) · x86_64 · 1 vCPU", META),
         sp(0.15),
         Paragraph("Semillas experimentales: 42, 123, 7, 99, 456", META),
@@ -178,28 +182,43 @@ def build(outdir: Path):
             "encontradas y actualizando sus trayectorias en cada iteración. "
             "Esta exploración distribuida lo hace especialmente competitivo en problemas "
             "continuos no convexos donde los métodos de gradiente quedan atrapados en "
-            "óptimos locales."),
+            "óptimos locales. El presente trabajo se enmarca en los contenidos de la "
+            "asignatura <i>Programación Paralela</i> de 4º de Ingeniería Informática, "
+            "aplicando los modelos de análisis estudiados —Ley de Amdahl, Ley de "
+            "Gustafson, Taxonomía de Flynn, Condiciones de Bernstein— a un caso "
+            "concreto de metaheurística de optimización global."),
         sp(),
         par("Desde el punto de vista computacional, la estructura de PSO presenta una "
             "propiedad fundamental que lo convierte en un candidato ideal para la "
             "paralelización: la fase de evaluación del fitness es <i>embarazosamente "
             "paralela</i>. En cada iteración, las <i>n</i> partículas evalúan la función "
-            "objetivo de forma completamente independiente entre sí — no existe ninguna "
-            "comunicación ni dependencia de datos entre evaluaciones concurrentes. "
+            "objetivo de forma completamente independiente entre sí. Esta independencia "
+            "se verifica formalmente mediante las <b>Condiciones de Bernstein</b>: "
+            "si denotamos R<sub>i</sub> y W<sub>i</sub> como los conjuntos de memoria "
+            "leída y escrita por la evaluación de la partícula <i>i</i>, entonces "
+            "R<sub>i</sub>∩W<sub>j</sub>=∅, W<sub>i</sub>∩R<sub>j</sub>=∅ y "
+            "W<sub>i</sub>∩W<sub>j</sub>=∅ para todo <i>i≠j</i>, lo que garantiza "
+            "que las evaluaciones pueden ejecutarse simultáneamente sin riesgo de "
+            "<i>race conditions</i> ni necesidad de sincronización. "
             "Esta independencia abre la puerta a explotar múltiples mecanismos de "
-            "paralelismo disponibles en el ecosistema Python: hilos, procesos, "
-            "concurrencia asíncrona y vectorización a nivel de instrucción de CPU."),
+            "paralelismo disponibles en el ecosistema Python: hilos (TLP), procesos "
+            "(MIMD), concurrencia asíncrona (event loop) y vectorización SIMD."),
         sp(),
         par("Este proyecto implementa PSO canónico con los parámetros teóricamente "
             "óptimos de Clerc &amp; Kennedy (2002) y compara cinco estrategias de "
-            "evaluación: <b>V0</b> secuencial como baseline, <b>V1</b> basada en hilos "
-            "del sistema operativo (threading), <b>V2</b> basada en procesos independientes "
-            "(multiprocessing), <b>V3</b> mediante concurrencia cooperativa (asyncio), "
-            "y <b>V4</b> mediante vectorización NumPy que aprovecha instrucciones SIMD "
-            "de la CPU. Las cinco estrategias comparten exactamente el mismo núcleo PSO "
-            "y se intercambian sin modificar ninguna otra parte del código, "
-            "lo que garantiza que las diferencias de rendimiento medidas son "
-            "exclusivamente atribuibles a la estrategia de evaluación."),
+            "evaluación: <b>V0</b> secuencial (SISD) como baseline, <b>V1</b> basada "
+            "en hilos del sistema operativo —Thread-Level Parallelism (TLP)—, "
+            "<b>V2</b> basada en procesos independientes que habilitan paralelismo "
+            "MIMD real, <b>V3</b> mediante concurrencia cooperativa (asyncio) para "
+            "cargas I/O-bound, y <b>V4</b> mediante vectorización NumPy que aprovecha "
+            "instrucciones SIMD de la CPU (SSE2/AVX). Siguiendo la "
+            "<b>Taxonomía de Flynn</b>, la máquina subyacente opera en modo SISD "
+            "desde la perspectiva del intérprete Python, pero V4 eleva el cómputo "
+            "al nivel SIMD delegando en las rutinas vectoriales de NumPy, y V2 "
+            "convierte el sistema en MIMD al lanzar múltiples procesos con flujos "
+            "de instrucciones y datos independientes. Las cinco estrategias comparten "
+            "exactamente el mismo núcleo PSO, garantizando que las diferencias de "
+            "rendimiento son exclusivamente atribuibles a la estrategia de evaluación."),
         sp(),
     ]
 
@@ -242,32 +261,36 @@ def build(outdir: Path):
     # 2.2 Estrategias
     story += h2("2.2 Estrategias de paralelización implementadas (V0–V4)")
     story += [
-        par("La siguiente tabla resume los cinco mecanismos implementados. "
-            "Cada uno representa un nivel distinto del stack de concurrencia de Python "
-            "y del sistema operativo, con trade-offs específicos entre overhead, "
-            "granularidad y tipo de carga de trabajo:"),
+        par("La siguiente tabla resume los cinco mecanismos implementados, clasificados "
+            "según la <b>Taxonomía de Flynn</b> (1966). Cada uno representa un nivel "
+            "distinto del stack de concurrencia de Python y del sistema operativo, "
+            "con trade-offs específicos entre overhead, <i>granularidad</i> "
+            "(fina/gruesa) y tipo de carga de trabajo. La elección de la estrategia "
+            "óptima depende críticamente del coste de evaluación por partícula: "
+            "para evaluaciones rápidas (&lt;1 µs) domina el overhead de coordinación; "
+            "para evaluaciones lentas (&gt;10 ms) el paralelismo real amortiza dicho coste:"),
         sp(0.15),
     ]
 
     strat_rows = [
-        _hrow(["V", "Mecanismo", "Cuándo beneficia", "Limitación principal"], HDR),
-        _row(["V0", "Bucle Python secuencial puro",
+        _hrow(["V", "Mecanismo (Flynn)", "Cuándo beneficia", "Limitación principal"], HDR),
+        _row(["V0", "Bucle Python secuencial — SISD\n(Single Instruction, Single Data)",
               "Baseline de referencia; funciones que evalúan en sub-microsegundo donde cualquier overhead domina",
-              "Sin paralelismo; tiempo proporcional a n × t_eval"], CELL),
-        _row(["V1", "ThreadPoolExecutor del módulo concurrent.futures",
+              "Sin paralelismo; tiempo proporcional a n × t_eval. Fracción serie P=0%→Amdahl irrelevante"], CELL),
+        _row(["V1", "ThreadPoolExecutor — TLP (Thread-Level Parallelism)\nModo SIMD lógico si GIL se libera",
               "Evaluaciones que liberan el GIL: operaciones de I/O, extensiones C (NumPy, SciPy), llamadas a servicios externos",
-              "El GIL de CPython serializa el bytecode Python puro; añade overhead de scheduling del SO para CPU-bound"], CELL),
-        _row(["V2", "ProcessPoolExecutor con batching adaptativo",
-              "Evaluaciones CPU-bound costosas (> 10–50 ms por evaluación) donde el paralelismo real compensa la serialización",
-              "Coste de serialización pickle en IPC; overhead de creación de procesos; saturación de CPU si n_workers > n_cores"], CELL),
-        _row(["V3", "asyncio.gather con run_in_executor",
-              "Escenarios de latencia asimétrica y alta concurrencia I/O; funciones objetivo que consultan servicios externos",
-              "Overhead del event loop; internamente delega a un ThreadPoolExecutor, por lo que no elimina el GIL"], CELL),
-        _row(["V4", "NumPy broadcasting sobre matriz completa de posiciones",
-              "Funciones objetivo analíticas que admiten vectorización: sphere, rastrigin, ackley, rosenbrock",
-              "Requiere implementar fn_vec(positions)→ndarray; sin esa implementación, cae a fallback secuencial"], CELL),
+              "GIL de CPython serializa bytecode Python puro: no hay paralelismo real CPU-bound; overhead de scheduling del SO"], CELL),
+        _row(["V2", "ProcessPoolExecutor — MIMD\n(Multiple Instruction, Multiple Data)",
+              "Evaluaciones CPU-bound costosas (>10–50 ms/eval) donde el paralelismo MIMD real compensa la serialización IPC",
+              "Coste de serialización pickle en IPC (50–200 µs/eval); overhead de creación de procesos; granularidad gruesa obligatoria"], CELL),
+        _row(["V3", "asyncio.gather con run_in_executor\nConcurrencia cooperativa (event loop)",
+              "Escenarios I/O-bound con alta concurrencia: APIs externas, bases de datos, funciones async nativas",
+              "Overhead del event loop; delega en executor de hilos (no elimina GIL); menor beneficio que V1 con funciones síncronas"], CELL),
+        _row(["V4", "NumPy broadcasting — SIMD hardware\n(SSE2/AVX sobre matriz de posiciones)",
+              "Funciones objetivo analíticas vectorizables: sphere, rastrigin, ackley, rosenbrock. Granularidad fina nativa",
+              "Requiere fn_vec(positions)→ndarray; sin esa implementación cae a fallback secuencial con overhead adicional"], CELL),
     ]
-    t2 = Table(strat_rows, colWidths=[0.6*cm, 3.8*cm, 6.0*cm, 6.2*cm])
+    t2 = Table(strat_rows, colWidths=[0.6*cm, 4.4*cm, 6.0*cm, 5.6*cm])
     t2.setStyle(TableStyle(_BASE_TS))
     story += [t2, sp()]
 
@@ -392,6 +415,21 @@ def build(outdir: Path):
     story += [
         par("La comparativa de tiempos de pared entre V0, V1 y V4 revela el impacto "
             "real del GIL y de la vectorización para funciones de evaluación rápida. "
+            "Antes de presentar los datos, conviene situar las expectativas teóricas "
+            "mediante la <b>Ley de Amdahl</b> (1967): si la fracción paralelizable "
+            "del trabajo es <i>P</i>, el speedup máximo alcanzable con <i>n</i> "
+            "procesadores es S(n) = 1 / ((1−P) + P/n). "
+            "En PSO, la fase de evaluación constituye la mayor parte del trabajo "
+            "(fracción P alta), pero el bucle de actualización de posiciones y "
+            "velocidades es inherentemente serie (1−P). Para evaluaciones "
+            "sub-microsegundo como las de este benchmark, el overhead de "
+            "coordinación se suma a la fracción serie, reduciendo drasticamente "
+            "el speedup real por debajo del límite teórico de Amdahl. "
+            "La <b>Ley de Gustafson</b> (1988) ofrece una perspectiva complementaria: "
+            "S(P) = P − α(P−1), donde α es la fracción serial. Con enjambres grandes "
+            "(más partículas) o funciones costosas, α→0 y el speedup escala "
+            "casi linealmente con los recursos —esto justifica V4 para problemas "
+            "de alta dimensionalidad con fn_vec implementado. "
             "Los tiempos son medias sobre 5 semillas; el speedup se calcula como "
             "T(V0) / T(estrategia), de modo que valores &gt;1 indican aceleración "
             "y valores &lt;1 indican ralentización respecto al baseline secuencial:"),
@@ -652,87 +690,122 @@ def build(outdir: Path):
     # ════════════════════════════════════════════════════════════════════
     story += [PageBreak()] + h1("4. Discusión crítica")
 
-    story += h2("4.1 El GIL de CPython y su impacto en V1 (hilos)")
+    story += h2("4.1 El GIL de CPython y su impacto en V1 (hilos / TLP)")
     story += [
-        par("El Global Interpreter Lock (GIL) es un mutex que protege el estado "
-            "interno del intérprete CPython, garantizando que sólo un hilo pueda "
-            "ejecutar bytecode Python en cada instante. Fue introducido para "
-            "simplificar la gestión de memoria por conteo de referencias, "
-            "que de otro modo requeriría sincronización costosa a nivel de objeto. "
-            "La consecuencia directa es que, para carga de trabajo CPU-bound pura, "
-            "los hilos de Python no proporcionan paralelismo real: aunque el SO "
-            "asigna los hilos a distintos núcleos, el GIL los serializa a nivel "
-            "del intérprete."),
+        par("El <b>Thread-Level Parallelism (TLP)</b> es el mecanismo de paralelismo "
+            "más inmediato disponible en Python: el módulo "
+            "<font name='Courier' size=8>threading</font> crea hilos del SO que el "
+            "planificador puede asignar a distintos núcleos. Sin embargo, CPython "
+            "impone una restricción fundamental mediante el "
+            "<b>Global Interpreter Lock (GIL)</b>: un mutex global que garantiza "
+            "que sólo un hilo ejecute bytecode Python en cada instante. "
+            "El GIL fue introducido para simplificar la gestión de memoria por "
+            "conteo de referencias —que de otro modo requeriría sincronización "
+            "costosa objeto a objeto— y para eliminar por diseño las "
+            "<i>race conditions</i> más comunes (dos hilos modificando el mismo "
+            "objeto Python simultáneamente). La consecuencia es que, para carga "
+            "CPU-bound pura, el TLP de Python no proporciona paralelismo real: "
+            "aunque el SO asigna los hilos a distintos núcleos, el GIL los "
+            "serializa a nivel del intérprete, haciendo que la Ley de Amdahl "
+            "opere con fracción serie P≈0 (todo el trabajo está serializado)."),
         sp(0.1),
         par("Los resultados de §3.2 cuantifican este efecto: V1 es 25–30× más lento "
             "que V0, lo que significa que cada evaluación con hilos cuesta "
-            "el equivalente a 25–30 evaluaciones secuenciales en términos de tiempo "
-            "de pared. El overhead tiene dos componentes: (1) el coste de creación "
-            "y gestión del pool de hilos, que se amortiza a lo largo de la ejecución, "
-            "y (2) el coste por tarea de adquisición y liberación del GIL y de los "
-            "cambios de contexto del SO, que es constante y domina completamente "
-            "para evaluaciones de microsegundos."),
+            "el equivalente a 25–30 evaluaciones secuenciales. El overhead tiene "
+            "dos componentes: (1) el coste de creación y gestión del pool de hilos, "
+            "que se amortiza a lo largo de la ejecución, y (2) el coste por tarea "
+            "de adquisición/liberación del GIL y de los cambios de contexto del SO "
+            "(cada conmutación cuesta ~1–10 µs en Linux), que domina completamente "
+            "para evaluaciones de microsegundos. Desde la perspectiva de la "
+            "Taxonomía de Flynn, V1 intenta operar como MIMD pero el GIL lo "
+            "degrada a SISD con overhead de coordinación."),
         sp(0.1),
         par("La situación se invierte radicalmente cuando las evaluaciones son "
             "I/O-bound. El GIL se libera automáticamente durante operaciones "
-            "bloqueantes del sistema operativo: llamadas a "
+            "bloqueantes del SO: llamadas a "
             "<font name='Courier' size=8>time.sleep()</font>, lectura de ficheros, "
-            "operaciones de red, o cualquier extensión C que no tenga operaciones "
-            "sobre objetos Python. En estas condiciones, los hilos sí pueden ejecutarse "
-            "concurrentemente a nivel de sistema operativo, "
-            f"y V1 logra {v1sp:.1f}× de speedup en el experimento de latencia (§3.3)."),
+            "operaciones de red, o cualquier extensión C que no opere sobre objetos "
+            "Python. En estas condiciones, el TLP sí es efectivo: los hilos se "
+            "bloquean esperando I/O sin retener el GIL, permitiendo que otros hilos "
+            "progresen. Las <i>race conditions</i>, <i>deadlocks</i> y "
+            "<i>starvation</i> que son problemas clásicos del TLP quedan "
+            "automáticamente evitados en PSO gracias a las Condiciones de Bernstein "
+            f"(§1): cada hilo escribe en posiciones de memoria distintas. "
+            f"V1 logra {v1sp:.1f}× de speedup en el experimento de latencia (§3.3), "
+            f"con un speedup teórico de Amdahl S≈{npa:.0f}× si α→0 "
+            f"(P→1, todos los {npa} hilos duermen simultáneamente sin fracción serie)."),
         sp(),
     ]
 
-    story += h2("4.2 Serialización IPC y el coste de V2 (multiproceso)")
+    story += h2("4.2 Serialización IPC y el coste de V2 (multiproceso MIMD)")
     story += [
-        par("V2 evita el GIL completamente usando procesos independientes del SO, "
-            "cada uno con su propio intérprete Python y su propia heap de memoria. "
-            "Esto permite paralelismo CPU genuino: si hay N núcleos disponibles, "
-            "N procesos pueden ejecutar código Python simultáneamente. "
-            "Sin embargo, la independencia de memoria implica que el intercambio "
-            "de datos entre el proceso coordinador y los workers debe hacerse "
-            "mediante mecanismos de comunicación inter-proceso (IPC), "
-            "que en Python se implementan serializando los objetos mediante pickle "
-            "y transmitiéndolos a través de pipes del SO."),
+        par("V2 representa la implementación más fiel al modelo <b>MIMD</b> de la "
+            "Taxonomía de Flynn: múltiples procesos del SO ejecutan instrucciones "
+            "distintas sobre datos distintos, cada uno con su propio intérprete "
+            "Python, su propia heap de memoria y su propia copia del GIL. "
+            "Esto habilita <b><i>strong scaling</i></b> genuino: si hay N núcleos, "
+            "N procesos pueden ejecutar código Python simultáneamente sin ningún "
+            "bloqueo de intérprete. La Ley de Amdahl predice un speedup teórico "
+            "S(N)=1/((1−P)+P/N) que, con fracción paralelizable alta P≈0.95 y "
+            "4 núcleos, sería S≈3.5×. La realidad es radicalmente distinta porque "
+            "la independencia de memoria de los procesos exige comunicación "
+            "inter-proceso (IPC) para transferir datos entre el coordinador y los "
+            "workers, y esta comunicación se convierte en la fracción serie dominante."),
         sp(0.1),
-        par("Para las funciones benchmark de este proyecto, cada evaluación completa "
-            "en 1–10 µs (microsegundos). El coste mínimo de serialización pickle + "
-            "pipe write + pipe read + deserialización para un array NumPy de 30 "
-            "floats es del orden de 50–200 µs, es decir, entre 5 y 200 veces el "
-            "tiempo de cómputo útil. V2 sería, en este escenario, entre 100× y 500× "
-            "más lento que V0. El batching implementado en "
+        par("En Python, el IPC se implementa serializando objetos mediante "
+            "<font name='Courier' size=8>pickle</font> y transmitiéndolos "
+            "a través de pipes del SO (syscalls "
+            "<font name='Courier' size=8>write()</font> / "
+            "<font name='Courier' size=8>read()</font>). "
+            "Para las funciones benchmark de este proyecto, cada evaluación completa "
+            "en 1–10 µs. El coste mínimo de pickle + pipe write + pipe read + "
+            "deserialización para un array NumPy de 30 floats es del orden de "
+            "50–200 µs —entre 5 y 200 veces el tiempo de cómputo útil—. "
+            "Aplicando Amdahl con fracción serial α≈IPC/total≈0.95, el speedup "
+            "teórico converge a 1/α≈1.05×, es decir, prácticamente sin beneficio. "
+            "El <i>batching</i> implementado en "
             "<font name='Courier' size=8>MultiprocessEvaluator</font> "
-            "mitiga parcialmente este problema agrupando varias partículas "
-            "por transferencia IPC, pero no elimina el overhead fundamental. "
-            "V2 resulta beneficioso únicamente cuando cada evaluación tarda "
-            "<b>más de 10–50 ms</b>: simulaciones físicas, inferencia de modelos ML, "
-            "renderizado, o cálculo de elementos finitos."),
+            "agrupa múltiples partículas por transferencia IPC, aumentando la "
+            "<i>granularidad</i> de cada tarea de fina a gruesa y reduciendo α. "
+            "V2 resulta beneficioso —y es la estrategia correcta— únicamente cuando "
+            "cada evaluación tarda <b>más de 10–50 ms</b>: simulaciones de elementos "
+            "finitos, inferencia de modelos ML, renderizado, o cálculo CFD. "
+            "En esos casos, el <i>weak scaling</i> también mejora con V2: al aumentar "
+            "el número de partículas manteniendo el tiempo por partícula constante, "
+            "el speedup escala aproximadamente con n_cores (Ley de Gustafson con α→0)."),
         sp(),
     ]
 
     story += h2("4.3 Vectorización NumPy y SIMD en V4")
     story += [
-        par("La vectorización de V4 representa un enfoque fundamentalmente distinto "
-            "al paralelismo basado en concurrencia: en lugar de dividir el trabajo "
-            "entre múltiples agentes de ejecución, elimina el overhead del intérprete "
-            "Python del bucle de evaluación delegando el cómputo a rutinas de bajo "
-            "nivel que operan sobre arrays contiguos en memoria. "
-            "NumPy compila sus operaciones usando BLAS/LAPACK en la capa de álgebra "
-            "lineal, y en arquitecturas x86 modernas genera automáticamente "
-            "instrucciones vectoriales SIMD (SSE2, AVX, AVX-512) que procesan "
-            "entre 4 y 16 flotantes en paralelo en un único ciclo de CPU."),
+        par("La vectorización de V4 representa la implementación de paralelismo "
+            "<b>SIMD</b> (Single Instruction, Multiple Data) según la Taxonomía de Flynn: "
+            "una única instrucción de la CPU opera simultáneamente sobre múltiples "
+            "datos, sin necesidad de múltiples hilos ni procesos. En arquitecturas "
+            "x86 modernas, las extensiones SSE2 procesan 4 flotantes de 32 bits en "
+            "paralelo (128-bit register), AVX procesa 8 (256-bit), y AVX-512 "
+            "procesa 16 (512-bit) —todo en un único ciclo de reloj—. "
+            "NumPy aprovecha estas instrucciones automáticamente a través de "
+            "BLAS/OpenBLAS para álgebra lineal y de las rutinas ufunc para "
+            "operaciones elemento a elemento. V4 implementa esta estrategia "
+            "evaluando la matriz completa de posiciones <b>P</b>∈ℝ<sup>n×d</sup> "
+            "en una única llamada "
+            "<font name='Courier' size=8>fn_vec(positions)→ndarray[n]</font>, "
+            "delegando el bucle sobre partículas al nivel C/SIMD y eliminando "
+            "completamente el intérprete Python del camino crítico."),
         sp(0.1),
         par("El speedup de 3–5× observado en §3.2 tiene tres causas principales: "
-            "(1) la eliminación del overhead del intérprete Python por cada evaluación "
-            "(cada iteración del bucle Python cuesta ~50–100 ns de overhead puro); "
-            "(2) la mejora en la localidad de caché, ya que NumPy organiza los "
-            "datos en arrays contiguos que la CPU puede precargar eficientemente "
-            "en la caché L1/L2; y (3) las instrucciones SIMD que permiten aplicar "
-            "la misma operación a múltiples datos simultáneamente sin ningún "
-            "overhead de sincronización ni de IPC. "
-            "El límite del speedup está determinado por la latencia de memoria "
-            "y por el coste del paso de la barrera Python→C para iniciar cada operación."),
+            "(1) eliminación del overhead del intérprete Python por cada evaluación "
+            "(cada iteración del bucle Python cuesta ~50–100 ns de overhead puro, "
+            "que con 40 partículas se acumula a 2–4 µs solo de interpretación); "
+            "(2) mejora en la localidad de caché —NumPy organiza las posiciones en "
+            "un array contiguo C-order que la CPU puede precargar en L1/L2 antes "
+            "de que comience el cómputo—; y (3) instrucciones SIMD que aplican "
+            "la misma operación a 4–8 flotantes simultáneamente sin overhead de "
+            "sincronización ni IPC. Desde la perspectiva de Gustafson, V4 exhibe "
+            "<i>weak scaling</i> ideal: duplicar el número de partículas no "
+            "incrementa el tiempo si el vector cabe en caché, pues las instrucciones "
+            "SIMD procesan el vector ampliado igual de eficientemente."),
         sp(0.1),
         par("El experimento de portafolio (§3.6) ilustra la limitación crítica de V4: "
             "si la función objetivo no implementa "
@@ -740,52 +813,67 @@ def build(outdir: Path):
             "<font name='Courier' size=8>VectorisedEvaluator</font> ejecuta "
             "un fallback secuencial que no aporta ningún beneficio. "
             "La vectorización requiere que la función matemática sea expresable "
-            "como operaciones NumPy sobre la matriz completa de posiciones, "
-            "lo que es posible para funciones analíticas estándar pero no "
-            "para funciones con estado, bifurcaciones complejas o llamadas externas."),
+            "como operaciones NumPy sobre la matriz completa de posiciones "
+            "(patrón SIMD puro), lo que es posible para funciones analíticas "
+            "estándar pero no para funciones con estado, bifurcaciones complejas "
+            "o llamadas externas. En esos casos, la estrategia correcta es V1, V2 "
+            "o V3 según el perfil de coste."),
         sp(),
     ]
 
     story += h2("4.4 Asyncio: cuándo la concurrencia cooperativa tiene sentido (V3)")
     story += [
         par("El modelo de concurrencia de asyncio es fundamentalmente distinto "
-            "al de los hilos: en lugar de preemption por el SO (el sistema operativo "
-            "interrumpe los hilos en momentos arbitrarios), asyncio usa "
-            "<i>cesión cooperativa</i> del control. Una corrutina ejecuta hasta "
-            "que alcanza un punto <font name='Courier' size=8>await</font> explícito, "
-            "momento en que cede el control al event loop para que ejecute otra "
-            "corrutina pendiente. Este modelo elimina por diseño las condiciones "
-            "de carrera y la necesidad de locks explícitos para proteger "
-            "estructuras de datos compartidas."),
+            "al de los hilos (TLP) y al de los procesos (MIMD): en lugar de "
+            "<i>preemption</i> por el SO (el planificador interrumpe los hilos en "
+            "momentos arbitrarios), asyncio usa <b>cesión cooperativa</b> del control. "
+            "Una corrutina ejecuta hasta que alcanza un punto "
+            "<font name='Courier' size=8>await</font> explícito, momento en que "
+            "cede el control al event loop para que ejecute otra corrutina pendiente. "
+            "Este modelo resuelve por diseño los problemas clásicos del TLP: "
+            "las <i>race conditions</i> son imposibles porque no hay preemption en "
+            "medio de una sección de código; los <i>deadlocks</i> solo pueden ocurrir "
+            "si dos corrutinas se esperan mutuamente (circular await); y la "
+            "<i>starvation</i> se evita mediante el planificador de corrutinas del "
+            "event loop. A cambio, requiere que la función objetivo sea async nativa "
+            "o delegable a un executor."),
         sp(0.1),
         par("En el contexto de PSO, V3 es la estrategia natural para escenarios "
-            "donde cada evaluación del fitness requiere operaciones de I/O asíncronas "
-            "nativas: consultas HTTP mediante aiohttp, operaciones de base de datos "
-            "mediante asyncpg, o cualquier biblioteca con interfaz async/await. "
+            "donde cada evaluación del fitness requiere I/O asíncrono nativo: "
+            "consultas HTTP mediante <font name='Courier' size=8>aiohttp</font>, "
+            "operaciones de base de datos mediante "
+            "<font name='Courier' size=8>asyncpg</font>, o cualquier biblioteca "
+            "con interfaz async/await. La fase de evaluación PSO es perfectamente "
+            "compatible con asyncio porque las Condiciones de Bernstein garantizan "
+            "que las corrutinas no comparten estado mutable —ningún lock es necesario—. "
             "En el experimento de §3.3, "
             "<font name='Courier' size=8>AsyncEvaluator</font> usa "
             "<font name='Courier' size=8>run_in_executor</font> porque "
-            "<font name='Courier' size=8>time.sleep()</font> es síncrono "
-            "(la versión async sería "
-            "<font name='Courier' size=8>asyncio.sleep()</font>). "
+            "<font name='Courier' size=8>time.sleep()</font> es síncrono. "
             "Esto introduce el overhead de despachar tareas síncronas al executor "
             f"interno, resultando en {v3sp:.1f}× vs {v1sp:.1f}× de V1. "
-            "Si se usara <font name='Courier' size=8>asyncio.sleep()</font> "
-            "directamente, el event loop gestionaría el solapamiento sin overhead "
-            "de executor y probablemente superaría a V1."),
+            "Si se reemplazara por <font name='Courier' size=8>asyncio.sleep()</font>, "
+            "el event loop gestionaría el solapamiento sin executor, reduciendo el "
+            "overhead de despacho y probablemente superando a V1."),
         sp(),
     ]
 
-    story += h2("4.5 Reproducibilidad, logging y observabilidad")
+    story += h2("4.5 Reproducibilidad, profiling y observabilidad")
     story += [
         par("La reproducibilidad experimental es un requisito de primer orden en "
             "la evaluación de algoritmos estocásticos. El sistema garantiza "
             "reproducibilidad completa mediante: (1) control de semilla explícito "
-            "en cada nivel (numpy.random.default_rng(seed) en el motor PSO y en "
-            "la generación de datos de mercado), (2) almacenamiento de la semilla "
-            "en cada fichero de resultados, y (3) instrumentación del entorno "
-            "de ejecución en meta.json (plataforma, versión Python, número de CPUs, "
-            "timestamp ISO 8601)."),
+            "en cada nivel (<font name='Courier' size=8>numpy.random.default_rng(seed)</font> "
+            "en el motor PSO y en la generación de datos de mercado), "
+            "(2) almacenamiento de la semilla en cada fichero de resultados, y "
+            "(3) instrumentación del entorno de ejecución en meta.json (plataforma, "
+            "versión Python, número de CPUs, timestamp ISO 8601). "
+            "Los tiempos de pared se miden con "
+            "<font name='Courier' size=8>time.perf_counter()</font>, "
+            "que en Linux resuelve a nanosegundos y no se ve afectado por cambios "
+            "de hora del sistema, equivalente al uso de "
+            "<font name='Courier' size=8>timeit</font> para benchmarks de alta "
+            "resolución temporal."),
         sp(0.1),
         par("El historial por iteración guardado en CSV incluye cinco métricas: "
             "best_fitness (mejor conocido global), mean_fitness (media del enjambre), "
@@ -794,11 +882,15 @@ def build(outdir: Path):
             "Esta separación entre tiempo de evaluación y tiempo de actualización "
             "es deliberada: permite aislar el impacto de cada estrategia en la "
             "fase de evaluación sin contaminar la medición con el tiempo de "
-            "actualización vectorizada, que es común a todas las estrategias. "
-            "El logging usa el módulo estándar "
+            "actualización —equivalente a un perfil <b>cProfile</b> que desglosa "
+            "por función—. El módulo estándar "
             "<font name='Courier' size=8>logging</font> con niveles INFO/WARNING "
-            "y formato estructurado (timestamp, módulo, mensaje), "
-            "deshabilitado en la suite de tests para no contaminar la salida de pytest."),
+            "y formato estructurado (timestamp, módulo, mensaje) proporciona "
+            "trazabilidad completa sin interferir con la suite de pytest "
+            "(logging desactivado durante tests). La separación eval/update "
+            "permite además cuantificar empíricamente la fracción paralelizable "
+            "<i>P</i> de la Ley de Amdahl para cada combinación "
+            "función/dimensión/estrategia."),
         sp(),
     ]
 
@@ -850,7 +942,8 @@ def build(outdir: Path):
         sp(0.15),
         Paragraph("Todos los experimentos son reproducibles con las semillas indicadas. "
                   "Entorno: Python 3.12.3 · CPython · WSL2 (Linux 6.6) · x86_64 · 1 vCPU. "
-                  "Semillas: {42, 123, 7, 99, 456}.",
+                  "Semillas: {42, 123, 7, 99, 456}. "
+                  "Programación Paralela · CUNEF Universidad · Prof. Dr. José Luis Salmerón · Curso 2025-2026.",
                   ParagraphStyle("foot", parent=BASE, fontSize=7.5,
                                  textColor=colors.grey, alignment=TA_CENTER)),
     ]
