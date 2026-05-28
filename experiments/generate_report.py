@@ -870,29 +870,148 @@ def build(outdir: Path):
             "versión Python, número de CPUs, timestamp ISO 8601). "
             "Los tiempos de pared se miden con "
             "<font name='Courier' size=8>time.perf_counter()</font>, "
-            "que en Linux resuelve a nanosegundos y no se ve afectado por cambios "
-            "de hora del sistema, equivalente al uso de "
-            "<font name='Courier' size=8>timeit</font> para benchmarks de alta "
-            "resolución temporal."),
+            "equivalente a <font name='Courier' size=8>timeit</font> "
+            "para benchmarks de alta resolución temporal."),
         sp(0.1),
-        par("El historial por iteración guardado en CSV incluye cinco métricas: "
-            "best_fitness (mejor conocido global), mean_fitness (media del enjambre), "
-            "std_fitness (dispersión), elapsed_eval (tiempo de evaluación) y "
-            "elapsed_update (tiempo de actualización de posiciones). "
-            "Esta separación entre tiempo de evaluación y tiempo de actualización "
-            "es deliberada: permite aislar el impacto de cada estrategia en la "
-            "fase de evaluación sin contaminar la medición con el tiempo de "
-            "actualización —equivalente a un perfil <b>cProfile</b> que desglosa "
-            "por función—. El módulo estándar "
-            "<font name='Courier' size=8>logging</font> con niveles INFO/WARNING "
-            "y formato estructurado (timestamp, módulo, mensaje) proporciona "
-            "trazabilidad completa sin interferir con la suite de pytest "
-            "(logging desactivado durante tests). La separación eval/update "
-            "permite además cuantificar empíricamente la fracción paralelizable "
-            "<i>P</i> de la Ley de Amdahl para cada combinación "
-            "función/dimensión/estrategia."),
+        par("El historial por iteración guardado en CSV separa "
+            "<i>elapsed_eval</i> (fase de evaluación, paralelizable) de "
+            "<i>elapsed_update</i> (actualización de posiciones, serie). "
+            "Esta separación permite cuantificar empíricamente la fracción "
+            "paralelizable <i>P</i> de la Ley de Amdahl para cada combinación. "
+            "El <b>profiling con cProfile</b> desglosa el tiempo a nivel de función "
+            "e identifica los cuellos de botella reales, más allá de las mediciones "
+            "de pared. La tabla siguiente muestra los resultados reales de "
+            "<font name='Courier' size=8>cProfile</font> sobre tres estrategias "
+            "en Sphere d=10 (300 iteraciones, semilla 42):"),
+        sp(0.15),
+    ]
+
+    # Cargar datos reales de cProfile
+    try:
+        cp_data = json.loads(Path("results/extras/cprofile_results.json").read_text())
+        cp_sphere = [r for r in cp_data if r["function"] == "sphere" and r["dim"] == 10]
+        cp_rast30 = [r for r in cp_data if r["function"] == "rastrigin" and r["dim"] == 30]
+    except Exception:
+        cp_sphere, cp_rast30 = [], []
+
+    def _extract_top_fn(profile_text: str) -> str:
+        for line in profile_text.split("\n"):
+            if "ncalls" in line or not line.strip() or line.strip().startswith("ncalls"):
+                continue
+            parts = line.split()
+            if len(parts) >= 6 and parts[0].replace("/","").isdigit():
+                fn_part = " ".join(parts[5:])
+                fn_part = fn_part.split("(")[-1].rstrip(")")
+                if len(fn_part) > 40:
+                    fn_part = "..." + fn_part[-37:]
+                return fn_part
+        return "—"
+
+    cp_rows = [_hrow(["Estrategia", "Tiempo total (s)", "Llamadas a sphere()", "Función más costosa (tottime)", "Diagnóstico"], HDR)]
+    strat_diag = {
+        "V0_sequential": "Cómputo distribuido en np.sum; overhead del intérprete domina",
+        "V1_threading":  "52k acquire() de _thread.lock: GIL contendido entre 40 hilos; threading.join() acumula 4s",
+        "V4_vectorised": "Mismo perfil que V0 + 257 warnings de fallback (sin fn_vec implementado)",
+    }
+    for r in cp_sphere:
+        n_sphere_calls = r["profile_text"].count("sphere") and sum(
+            1 for line in r["profile_text"].split("\n")
+            if "sphere" in line and line.strip() and not line.strip().startswith("ncalls")
+        )
+        # extract ncalls for sphere
+        ncalls = "—"
+        for line in r["profile_text"].split("\n"):
+            if "sphere" in line and "objectives" in line:
+                parts = line.split()
+                if parts:
+                    ncalls = parts[0].split("/")[0]
+                break
+        cp_rows.append([
+            Paragraph(r["strategy"], CELL),
+            Paragraph(f"{r['total_time_s']:.4f}", CELL_C),
+            Paragraph(ncalls, CELL_C),
+            Paragraph(_extract_top_fn(r["profile_text"]), CELL),
+            Paragraph(strat_diag.get(r["strategy"], "—"), CELL),
+        ])
+    t_cp = Table(cp_rows, colWidths=[3.0*cm, 2.4*cm, 2.4*cm, 3.8*cm, 5.0*cm])
+    t_cp.setStyle(TableStyle(_BASE_TS))
+    story += [t_cp, sp(0.15)]
+    story += [
+        par("El perfil de cProfile confirma con precisión quirúrgica los mecanismos "
+            "descritos en §4.1–4.3. En V0, el tiempo se distribuye entre "
+            "<font name='Courier' size=8>sphere()</font> (9 ms) y las llamadas "
+            "internas a <font name='Courier' size=8>numpy.sum</font> (5 ms), "
+            "con el overhead de interpretación Python constituyendo la fracción "
+            "restante. En V1, el perfil revela 52.156 llamadas a "
+            "<font name='Courier' size=8>_thread.lock.acquire()</font> acumulando "
+            "4.2 segundos —la huella inequívoca del GIL contendido entre 40 hilos "
+            "que compiten por ejecutar bytecode Python—, más 4.1 segundos en "
+            "<font name='Courier' size=8>threading.join()</font> esperando a que "
+            "cada iteración de hilo complete. En V4, el perfil es idéntico a V0 "
+            "más 257 mensajes de warning de fallback, corroborando que sin "
+            "<font name='Courier' size=8>fn_vec</font> no hay vectorización real."),
         sp(),
     ]
+
+    story += h2("4.6 Animación de la convergencia del enjambre (GIF)")
+    story += [
+        par("Para visualizar el comportamiento dinámico del enjambre PSO, "
+            "se han generado animaciones GIF frame a frame que muestran cómo "
+            "las 40 partículas (puntos blancos) y el mejor global (estrella roja) "
+            "evolucionan sobre el contorno de la función objetivo. "
+            "Las animaciones cubren 200 iteraciones a 12 fps con "
+            "<font name='Courier' size=8>every=2</font> (un frame por cada 2 iteraciones) "
+            "y se encuentran en "
+            "<font name='Courier' size=8>results/extras/sphere_d2.gif</font> y "
+            "<font name='Courier' size=8>results/extras/rastrigin_d2.gif</font>. "
+            "A continuación se muestran frames representativos extraídos de cada GIF:"),
+        sp(0.15),
+    ]
+
+    # Extraer frames del GIF para el PDF
+    def _extract_gif_frame(gif_path: str, frame_idx: int, out_png: str) -> str | None:
+        try:
+            from PIL import Image as PI
+            with PI.open(gif_path) as im:
+                n = getattr(im, 'n_frames', 1)
+                idx = min(frame_idx, n - 1)
+                im.seek(idx)
+                frame = im.convert("RGB")
+                frame.save(out_png)
+            return out_png
+        except Exception:
+            return None
+
+    extras = Path("results/extras")
+    gif_frames = []
+    for gif_name, label_early, label_late in [
+        ("sphere_d2.gif",    "Sphere d=2 — iteración 10 (exploración)",  "Sphere d=2 — iteración 90 (convergencia)"),
+        ("rastrigin_d2.gif", "Rastrigin d=2 — iteración 10 (exploración)", "Rastrigin d=2 — iteración 90 (mínimos locales)"),
+    ]:
+        gif_p = extras / gif_name
+        if gif_p.exists():
+            early_png = str(extras / (gif_name.replace(".gif", "_f010.png")))
+            late_png  = str(extras / (gif_name.replace(".gif", "_f045.png")))
+            _extract_gif_frame(str(gif_p), 5,  early_png)
+            _extract_gif_frame(str(gif_p), 45, late_png)
+            gif_frames.append((early_png, label_early, late_png, label_late))
+
+    if gif_frames:
+        fig_num = 13
+        for early_png, lbl_e, late_png, lbl_l in gif_frames:
+            im_e = _img(early_png, width=half - 0.3*cm)
+            im_l = _img(late_png,  width=half - 0.3*cm)
+            if im_e and im_l:
+                t_gif = Table(
+                    [[im_e or Spacer(1,1),   im_l or Spacer(1,1)],
+                     [Paragraph(f"Fig. {fig_num} – {lbl_e}", CAP),
+                      Paragraph(f"Fig. {fig_num+1} – {lbl_l}", CAP)]],
+                    colWidths=[half, half]
+                )
+                t_gif.setStyle(TableStyle([("VALIGN",(0,0),(-1,-1),"TOP"),("ALIGN",(0,0),(-1,-1),"CENTER")]))
+                story += [t_gif, sp(0.15)]
+                fig_num += 2
+    story += [sp(0.1)]
 
     # ════════════════════════════════════════════════════════════════════
     # 5. CONCLUSIONES

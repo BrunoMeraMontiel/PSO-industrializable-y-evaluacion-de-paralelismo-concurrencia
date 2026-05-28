@@ -1,0 +1,134 @@
+
+======================================================================
+Strategy=V0_sequential  fn=sphere  d=10  total=0.2011s
+         89549 function calls in 0.054 seconds
+
+   Ordered by: cumulative time
+   List reduced from 62 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.007    0.007    0.054    0.054 /home/bmera/pso_project/core/engine.py:17(run_pso)
+      257    0.003    0.000    0.035    0.000 /home/bmera/pso_project/parallel/sequential.py:4(sequential_evaluator)
+    10280    0.009    0.000    0.031    0.000 /home/bmera/pso_project/objectives/functions.py:5(sphere)
+    10280    0.005    0.000    0.022    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:2304(sum)
+    10280    0.006    0.000    0.016    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:66(_wrapreduction)
+    11052    0.010    0.000    0.010    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      256    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3833(std)
+      256    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:217(_std)
+      256    0.002    0.000    0.003    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:148(_var)
+      256    0.001    0.000    0.003    0.000 /home/bmera/pso_project/core/topologies.py:5(global_best_topology)
+      256    0.000    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3699(mean)
+      769    0.000    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:48(_wrapfunc)
+      256    0.001    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:115(_mean)
+      256    0.001    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/lib/_shape_base_impl.py:1199(tile)
+      256    0.000    0.000    0.002    0.000 /home/bmera/pso_project/core/boundaries.py:5(clamp)
+
+
+
+
+======================================================================
+Strategy=V1_threading  fn=sphere  d=10  total=31.3943s
+         1108337 function calls (1072097 primitive calls) in 1.883 seconds
+
+   Ordered by: cumulative time
+   List reduced from 143 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+52156/37394    0.266    0.000    4.176    0.000 {method 'acquire' of '_thread.lock' objects}
+     4119    0.005    0.000    4.033    0.001 /usr/lib/python3.12/threading.py:1115(join)
+     4119    0.005    0.000    4.015    0.001 /usr/lib/python3.12/threading.py:1153(_wait_for_tstate_lock)
+        1    0.017    0.017    1.883    1.883 /home/bmera/pso_project/core/engine.py:17(run_pso)
+      257    0.001    0.000    1.844    0.007 /home/bmera/pso_project/parallel/threading_eval.py:10(__call__)
+      257    0.000    0.000    1.842    0.007 /usr/lib/python3.12/concurrent/futures/_base.py:646(__exit__)
+      257    0.001    0.000    1.842    0.007 /usr/lib/python3.12/concurrent/futures/thread.py:219(shutdown)
+ 4119/257    0.035    0.000    1.796    0.007 /usr/lib/python3.12/threading.py:1016(_bootstrap)
+ 4119/257    0.012    0.000    1.755    0.007 /usr/lib/python3.12/threading.py:1056(_bootstrap_inner)
+ 4119/257    0.021    0.000    1.221    0.005 /usr/lib/python3.12/threading.py:999(run)
+ 4119/257    0.016    0.000    1.217    0.005 /usr/lib/python3.12/concurrent/futures/thread.py:69(_worker)
+ 6525/498    0.356    0.000    1.213    0.002 {method 'get' of '_queue.SimpleQueue' objects}
+    10280    0.173    0.000    0.800    0.000 /usr/lib/python3.12/concurrent/futures/thread.py:164(submit)
+    10280    0.013    0.000    0.536    0.000 /usr/lib/python3.12/concurrent/futures/thread.py:183(_adjust_thread_count)
+     4119    0.015    0.000    0.488    0.000 /usr/lib/python3.12/threading.py:973(start)
+
+
+
+
+======================================================================
+Strategy=V4_vectorised  fn=sphere  d=10  total=0.2472s
+         108830 function calls in 0.058 seconds
+
+   Ordered by: cumulative time
+   List reduced from 113 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.006    0.006    0.058    0.058 /home/bmera/pso_project/core/engine.py:17(run_pso)
+      257    0.003    0.000    0.041    0.000 /home/bmera/pso_project/parallel/vectorised_eval.py:24(__call__)
+    10280    0.008    0.000    0.029    0.000 /home/bmera/pso_project/objectives/functions.py:5(sphere)
+    10280    0.005    0.000    0.021    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:2304(sum)
+    10280    0.006    0.000    0.015    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:66(_wrapreduction)
+    11052    0.009    0.000    0.009    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      257    0.000    0.000    0.008    0.000 /usr/lib/python3.12/logging/__init__.py:1541(warning)
+      257    0.000    0.000    0.008    0.000 /usr/lib/python3.12/logging/__init__.py:1660(_log)
+      256    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3833(std)
+      257    0.000    0.000    0.004    0.000 /usr/lib/python3.12/logging/__init__.py:1686(handle)
+      256    0.000    0.000    0.003    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:217(_std)
+      257    0.000    0.000    0.003    0.000 /usr/lib/python3.12/logging/__init__.py:1746(callHandlers)
+      257    0.000    0.000    0.003    0.000 /usr/lib/python3.12/logging/__init__.py:1011(handle)
+      256    0.002    0.000    0.003    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:148(_var)
+      257    0.000    0.000    0.003    0.000 /usr/lib/python3.12/logging/__init__.py:1645(makeRecord)
+
+
+
+
+======================================================================
+Strategy=V0_sequential  fn=rastrigin  d=30  total=0.2837s
+         116942 function calls in 0.080 seconds
+
+   Ordered by: cumulative time
+   List reduced from 62 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.008    0.008    0.080    0.080 /home/bmera/pso_project/core/engine.py:17(run_pso)
+      301    0.003    0.000    0.060    0.000 /home/bmera/pso_project/parallel/sequential.py:4(sequential_evaluator)
+    12040    0.032    0.000    0.057    0.000 /home/bmera/pso_project/objectives/functions.py:11(rastrigin)
+    12040    0.006    0.000    0.024    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:2304(sum)
+    12040    0.007    0.000    0.017    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:66(_wrapreduction)
+    12944    0.010    0.000    0.010    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      300    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3833(std)
+      300    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:217(_std)
+      300    0.002    0.000    0.003    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:148(_var)
+      300    0.001    0.000    0.003    0.000 /home/bmera/pso_project/core/topologies.py:5(global_best_topology)
+      901    0.000    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:48(_wrapfunc)
+      300    0.000    0.000    0.002    0.000 /home/bmera/pso_project/core/boundaries.py:5(clamp)
+      300    0.000    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3699(mean)
+      300    0.001    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/lib/_shape_base_impl.py:1199(tile)
+      300    0.000    0.000    0.002    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:2207(clip)
+
+
+
+
+======================================================================
+Strategy=V4_vectorised  fn=rastrigin  d=30  total=0.3582s
+         139517 function calls in 0.092 seconds
+
+   Ordered by: cumulative time
+   List reduced from 109 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.009    0.009    0.092    0.092 /home/bmera/pso_project/core/engine.py:17(run_pso)
+      301    0.003    0.000    0.070    0.000 /home/bmera/pso_project/parallel/vectorised_eval.py:24(__call__)
+    12040    0.032    0.000    0.058    0.000 /home/bmera/pso_project/objectives/functions.py:11(rastrigin)
+    12040    0.006    0.000    0.024    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:2304(sum)
+    12040    0.007    0.000    0.017    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:66(_wrapreduction)
+    12944    0.010    0.000    0.010    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      301    0.000    0.000    0.009    0.000 /usr/lib/python3.12/logging/__init__.py:1541(warning)
+      301    0.000    0.000    0.009    0.000 /usr/lib/python3.12/logging/__init__.py:1660(_log)
+      300    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3833(std)
+      301    0.000    0.000    0.004    0.000 /usr/lib/python3.12/logging/__init__.py:1686(handle)
+      301    0.000    0.000    0.004    0.000 /usr/lib/python3.12/logging/__init__.py:1746(callHandlers)
+      300    0.000    0.000    0.004    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:217(_std)
+      301    0.000    0.000    0.004    0.000 /usr/lib/python3.12/logging/__init__.py:1011(handle)
+      301    0.000    0.000    0.003    0.000 /usr/lib/python3.12/logging/__init__.py:1645(makeRecord)
+      300    0.002    0.000    0.003    0.000 /home/bmera/pso_project/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:148(_var)
+
+

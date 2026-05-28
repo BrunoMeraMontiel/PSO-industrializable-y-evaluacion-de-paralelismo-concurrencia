@@ -10,9 +10,11 @@ build/
 .pytest_cache/
 
 # Resultados grandes o generados en ejecución
-*.gif
 *.mp4
 *.npz
+# GIFs ignorados salvo los de extras (animaciones PSO)
+*.gif
+!results/extras/*.gif
 
 # Archivos de entorno local
 .DS_Store
