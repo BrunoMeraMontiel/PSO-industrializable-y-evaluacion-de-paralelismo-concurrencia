@@ -22,7 +22,8 @@ class VectorisedEvaluator:
         self.fn_vec = fn_vec
 
     def __call__(self, fn, positions):
-        if self.fn_vec is not None:
-            return self.fn_vec(positions)
+        vec = self.fn_vec or getattr(fn, "fn_vec", None)
+        if vec is not None:
+            return vec(positions)
         logger.warning("VectorisedEvaluator: no fn_vec, falling back to sequential")
         return np.array([fn(x) for x in positions])
